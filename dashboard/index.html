@@ -1,1 +1,183 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Agent Dashboard — BLOCK MIND.</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 { font-size: 1.6rem; background: linear-gradient(90deg,#ff8a00,#e52e71); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header p { color: #aaa; margin-top: 4px; font-size: 0.9rem; }
 
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .stat-card .num { font-size: 1.4rem; font-weight: 700; color: #ffb347; }
+  .stat-card .label { font-size: 0.7rem; color: #bbb; margin-top: 4px; }
+
+  h2.section-title { font-size: 1rem; color: #ddd; margin: 20px 0 12px; letter-spacing: 0.5px; }
+
+  .agents { display: flex; flex-direction: column; gap: 14px; }
+  .agent-card {
+    background: rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 16px;
+    border-left: 4px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+  .agent-card .top-row { display: flex; align-items: center; gap: 10px; }
+  .agent-card .emoji { font-size: 1.6rem; }
+  .agent-card .name { font-weight: 700; font-size: 1rem; }
+  .agent-card .status {
+    margin-left: auto;
+    font-size: 0.7rem;
+    background: rgba(90, 220, 130, 0.15);
+    color: #5adc82;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .agent-card .desc { margin-top: 8px; font-size: 0.82rem; color: #ccc; line-height: 1.4; }
+
+  .videos { margin-top: 28px; }
+  .video-row {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.04);
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+  }
+  .video-row .title { max-width: 65%; color: #eee; }
+  .video-row .views { color: #ffb347; font-weight: 600; }
+
+  footer { text-align: center; margin-top: 30px; color: #666; font-size: 0.75rem; }
+  .loading { text-align: center; padding: 40px; color: #999; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎬 Content Agent Dashboard</h1>
+  <p id="channel-sub">BLOCK MIND. — loading...</p>
+</header>
+
+<div id="app" class="loading">Loading your data...</div>
+
+<footer>Last updated: <span id="updated">—</span></footer>
+
+<script>
+async function load() {
+  try {
+    const res = await fetch('data.json?t=' + Date.now());
+    const data = await res.json();
+    render(data);
+  } catch (e) {
+    document.getElementById('app').innerHTML = "Data not found yet. Run the fetch workflow first.";
+  }
+}
+
+function render(data) {
+  document.getElementById('channel-sub').textContent =
+    data.channel.name + " (@" + data.channel.handle + ")";
+  document.getElementById('updated').textContent =
+    new Date(data.fetchedAt).toLocaleString();
+
+  const totalViews = data.videos.reduce((a,v) => a + v.views, 0);
+  const avgViews = data.videos.length ? Math.round(totalViews / data.videos.length) : 0;
+
+  let html = `
+    <div class="stats">
+      <div class="stat-card"><div class="num">${data.channel.subscribers}</div><div class="label">Subscribers</div></div>
+      <div class="stat-card"><div class="num">${data.channel.totalViews}</div><div class="label">Total Views</div></div>
+      <div class="stat-card"><div class="num">${data.channel.totalVideos}</div><div class="label">Videos</div></div>
+    </div>
+
+    <h2 class="section-title">🤖 Your Agent Team</h2>
+    <div class="agents">
+
+      <div class="agent-card" style="--accent:#ff6b6b">
+        <div class="top-row">
+          <div class="emoji">🔍</div>
+          <div class="name">Ideator</div>
+          <div class="status">● Active</div>
+        </div>
+        <div class="desc">Scouting fresh content ideas based on trending self-help & motivational themes.</div>
+      </div>
+
+      <div class="agent-card" style="--accent:#ffb347">
+        <div class="top-row">
+          <div class="emoji">✍️</div>
+          <div class="name">Hook & Script</div>
+          <div class="status">● Active</div>
+        </div>
+        <div class="desc">Writing hooks and full scripts for upcoming long-form videos.</div>
+      </div>
+
+      <div class="agent-card" style="--accent:#5adc82">
+        <div class="top-row">
+          <div class="emoji">📅</div>
+          <div class="name">Planner</div>
+          <div class="status">● Active</div>
+        </div>
+        <div class="desc">Building the Mon/Wed/Sat upload calendar around top-performing themes.</div>
+      </div>
+
+      <div class="agent-card" style="--accent:#6bc1ff">
+        <div class="top-row">
+          <div class="emoji">📊</div>
+          <div class="name">Analyst</div>
+          <div class="status">● Active</div>
+        </div>
+        <div class="desc">Average views per video: <b>${avgViews}</b> across last ${data.videos.length} uploads.</div>
+      </div>
+
+      <div class="agent-card" style="--accent:#e26bff">
+        <div class="top-row">
+          <div class="emoji">💬</div>
+          <div class="name">DM Manager</div>
+          <div class="status" style="background:rgba(255,180,71,0.15); color:#ffb347;">● Coming soon</div>
+        </div>
+        <div class="desc">Will auto-triage and draft replies to Instagram/YouTube DMs and comments.</div>
+      </div>
+
+    </div>
+
+    <div class="videos">
+      <h2 class="section-title">🎥 Recent Videos</h2>
+      ${data.videos.map(v => `
+        <div class="video-row">
+          <div class="title">${v.title}</div>
+          <div class="views">${v.views} views</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('app').innerHTML = html;
+}
+
+load();
+</script>
+
+</body>
+  </html>
