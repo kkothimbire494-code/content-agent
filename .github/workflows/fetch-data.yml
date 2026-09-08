@@ -1,4 +1,6 @@
-name: Fetch YouTube Data
+name: Fetch YouTube Data 
+permissions:
+  contents: write
 
 on:
   workflow_dispatch:
