@@ -3,6 +3,12 @@ const fs = require("fs");
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
+const STOPWORDS = new Set([
+  "the","a","an","is","are","was","were","to","of","in","on","for","and","or",
+  "my","your","you","i","it","this","that","how","why","what","when","did",
+  "will","can","cost","story","life","gets","better","phone","controlled",
+]);
+
 function analyze(videos) {
   const sorted = [...videos].sort((a, b) => b.views - a.views);
   const topVideo = sorted[0];
@@ -31,6 +37,37 @@ function analyze(videos) {
   return { topVideo, trend, advice };
 }
 
+function generateIdeas(videos) {
+  const sorted = [...videos].sort((a, b) => b.views - a.views);
+  const topThree = sorted.slice(0, 3);
+
+  const wordCounts = {};
+  topThree.forEach((v) => {
+    v.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .split(/\s+/)
+      .forEach((word) => {
+        if (word.length > 2 && !STOPWORDS.has(word)) {
+          wordCounts[word] = (wordCounts[word] || 0) + 1;
+        }
+      });
+  });
+
+  const topWords = Object.entries(wordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([w]) => w);
+
+  if (topWords.length === 0) {
+    return ["Try a personal story format — your audience responds well to relatable struggles."];
+  }
+
+  return topWords.map(
+    (word) => `A video exploring "${word}" from a new angle — your audience engages with this theme.`
+  );
+}
+
 async function main() {
   const data = JSON.parse(fs.readFileSync("dashboard/data.json", "utf8"));
 
@@ -40,6 +77,7 @@ async function main() {
     : 0;
 
   const { topVideo, trend, advice } = analyze(data.videos);
+  const ideas = generateIdeas(data.videos);
 
   const message = `
 📊 *Daily Report — ${data.channel.name}*
@@ -53,6 +91,9 @@ async function main() {
 📊 Trend: ${trend}
 
 🤖 *Analyst says:* ${advice}
+
+🔍 *Ideator suggests:*
+${ideas.map((i) => `• ${i}`).join("\n")}
 
 Updated: ${new Date(data.fetchedAt).toLocaleString()}
 `.trim();
