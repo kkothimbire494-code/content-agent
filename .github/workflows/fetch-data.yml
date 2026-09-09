@@ -1,4 +1,4 @@
-name: Fetch YouTube Data 
+name: Fetch YouTube Data
 permissions:
   contents: write
 
@@ -29,7 +29,8 @@ jobs:
           git add dashboard/data.json
           git diff --staged --quiet || git commit -m "Update YouTube data"
           git push
-     - name: Send Telegram report
+
+      - name: Send Telegram report
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
