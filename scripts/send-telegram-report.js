@@ -3,6 +3,34 @@ const fs = require("fs");
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
+function analyze(videos) {
+  const sorted = [...videos].sort((a, b) => b.views - a.views);
+  const topVideo = sorted[0];
+
+  const byDate = [...videos].sort(
+    (a, b) => new Date(a.publishedAt) - new Date(b.publishedAt)
+  );
+  const half = Math.floor(byDate.length / 2) || 1;
+  const olderAvg =
+    byDate.slice(0, half).reduce((a, v) => a + v.views, 0) / half;
+  const newerAvg =
+    byDate.slice(half).reduce((a, v) => a + v.views, 0) /
+    (byDate.length - half || 1);
+
+  let trend = "steady";
+  if (newerAvg > olderAvg * 1.15) trend = "growing 📈";
+  else if (newerAvg < olderAvg * 0.85) trend = "slowing 📉";
+
+  const advice =
+    trend === "growing 📈"
+      ? `Momentum is building — keep making videos like "${topVideo.title}".`
+      : trend === "slowing 📉"
+      ? `Views are cooling off — try a new hook style or revisit what worked in "${topVideo.title}".`
+      : `Performance is steady — "${topVideo.title}" is your strongest format, lean into it.`;
+
+  return { topVideo, trend, advice };
+}
+
 async function main() {
   const data = JSON.parse(fs.readFileSync("dashboard/data.json", "utf8"));
 
@@ -11,7 +39,7 @@ async function main() {
     ? Math.round(totalViews / data.videos.length)
     : 0;
 
-  const topVideo = [...data.videos].sort((a, b) => b.views - a.views)[0];
+  const { topVideo, trend, advice } = analyze(data.videos);
 
   const message = `
 📊 *Daily Report — ${data.channel.name}*
@@ -22,6 +50,9 @@ async function main() {
 
 📈 Avg views (last ${data.videos.length} videos): ${avgViews}
 🏆 Top video: "${topVideo.title}" — ${topVideo.views} views
+📊 Trend: ${trend}
+
+🤖 *Analyst says:* ${advice}
 
 Updated: ${new Date(data.fetchedAt).toLocaleString()}
 `.trim();
