@@ -37,10 +37,9 @@ function analyze(videos) {
   return { topVideo, trend, advice };
 }
 
-function generateIdeas(videos) {
+function topThemeWords(videos) {
   const sorted = [...videos].sort((a, b) => b.views - a.views);
   const topThree = sorted.slice(0, 3);
-
   const wordCounts = {};
   topThree.forEach((v) => {
     v.title
@@ -53,27 +52,38 @@ function generateIdeas(videos) {
         }
       });
   });
-
-  const topWords = Object.entries(wordCounts)
+  return Object.entries(wordCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(([w]) => w);
+}
 
+function generateIdeas(topWords) {
   if (topWords.length === 0) {
     return ["Try a personal story format — your audience responds well to relatable struggles."];
   }
-
   return topWords.map(
     (word) => `A video exploring "${word}" from a new angle — your audience engages with this theme.`
   );
 }
 
+function generateHooks(topWords) {
+  if (topWords.length === 0) {
+    return ["Have you ever felt like nothing is going right? Watch this."];
+  }
+  const templates = [
+    (w) => `Nobody talks about ${w} like this...`,
+    (w) => `What if everything you knew about ${w} was wrong?`,
+    (w) => `This ${w} story will change how you think.`,
+  ];
+  return topWords.map((word, i) => templates[i % templates.length](word));
+}
+
 function planCalendar() {
   const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const uploadDays = [1, 3, 6]; // Mon, Wed, Sat
+  const uploadDays = [1, 3, 6];
   const results = [];
   let d = new Date();
-
   while (results.length < 3) {
     d.setDate(d.getDate() + 1);
     if (uploadDays.includes(d.getDay())) {
@@ -92,7 +102,9 @@ async function main() {
     : 0;
 
   const { topVideo, trend, advice } = analyze(data.videos);
-  const ideas = generateIdeas(data.videos);
+  const topWords = topThemeWords(data.videos);
+  const ideas = generateIdeas(topWords);
+  const hooks = generateHooks(topWords);
   const calendar = planCalendar();
 
   const message = `
@@ -110,6 +122,9 @@ async function main() {
 
 🔍 *Ideator suggests:*
 ${ideas.map((i) => `• ${i}`).join("\n")}
+
+✍️ *Hook & Script — try these openers:*
+${hooks.map((h) => `• "${h}"`).join("\n")}
 
 📅 *Planner — next uploads:*
 ${calendar.map((c) => `• ${c}`).join("\n")}
