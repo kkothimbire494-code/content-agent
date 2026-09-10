@@ -93,6 +93,17 @@ function planCalendar() {
   return results;
 }
 
+function summarizeComments(comments) {
+  if (!comments || comments.length === 0) {
+    return "No recent comments found.";
+  }
+  const lines = comments.slice(0, 5).map((c) => {
+    const snippet = c.text.length > 60 ? c.text.slice(0, 60) + "..." : c.text;
+    return `• ${c.author}: "${snippet}"`;
+  });
+  return `${comments.length} recent comments on top videos:\n${lines.join("\n")}`;
+}
+
 async function main() {
   const data = JSON.parse(fs.readFileSync("dashboard/data.json", "utf8"));
 
@@ -106,6 +117,7 @@ async function main() {
   const ideas = generateIdeas(topWords);
   const hooks = generateHooks(topWords);
   const calendar = planCalendar();
+  const commentSummary = summarizeComments(data.recentComments);
 
   const message = `
 📊 *Daily Report — ${data.channel.name}*
@@ -128,6 +140,9 @@ ${hooks.map((h) => `• "${h}"`).join("\n")}
 
 📅 *Planner — next uploads:*
 ${calendar.map((c) => `• ${c}`).join("\n")}
+
+💬 *DM Manager — comments:*
+${commentSummary}
 
 Updated: ${new Date(data.fetchedAt).toLocaleString()}
 `.trim();
