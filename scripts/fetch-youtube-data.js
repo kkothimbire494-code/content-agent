@@ -32,6 +32,30 @@ async function main() {
     comments: Number(v.statistics.commentCount || 0),
   }));
 
+  const topThree = [...videos].sort((a, b) => b.views - a.views).slice(0, 3);
+  const recentComments = [];
+
+  for (const v of topThree) {
+    try {
+      const cRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${v.id}&maxResults=5&order=time&key=${API_KEY}`
+      );
+      const cData = await cRes.json();
+      if (cData.items) {
+        cData.items.forEach((item) => {
+          const c = item.snippet.topLevelComment.snippet;
+          recentComments.push({
+            videoTitle: v.title,
+            author: c.authorDisplayName,
+            text: c.textDisplay.replace(/<[^>]*>/g, ""),
+          });
+        });
+      }
+    } catch (e) {
+      console.log("Could not fetch comments for", v.id);
+    }
+  }
+
   const output = {
     fetchedAt: new Date().toISOString(),
     channel: {
@@ -42,6 +66,7 @@ async function main() {
       totalVideos: Number(channel.statistics.videoCount || 0),
     },
     videos,
+    recentComments,
   };
 
   fs.mkdirSync("dashboard", { recursive: true });
