@@ -68,6 +68,21 @@ function generateIdeas(videos) {
   );
 }
 
+function planCalendar() {
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const uploadDays = [1, 3, 6]; // Mon, Wed, Sat
+  const results = [];
+  let d = new Date();
+
+  while (results.length < 3) {
+    d.setDate(d.getDate() + 1);
+    if (uploadDays.includes(d.getDay())) {
+      results.push(`${days[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`);
+    }
+  }
+  return results;
+}
+
 async function main() {
   const data = JSON.parse(fs.readFileSync("dashboard/data.json", "utf8"));
 
@@ -78,6 +93,7 @@ async function main() {
 
   const { topVideo, trend, advice } = analyze(data.videos);
   const ideas = generateIdeas(data.videos);
+  const calendar = planCalendar();
 
   const message = `
 📊 *Daily Report — ${data.channel.name}*
@@ -94,6 +110,9 @@ async function main() {
 
 🔍 *Ideator suggests:*
 ${ideas.map((i) => `• ${i}`).join("\n")}
+
+📅 *Planner — next uploads:*
+${calendar.map((c) => `• ${c}`).join("\n")}
 
 Updated: ${new Date(data.fetchedAt).toLocaleString()}
 `.trim();
