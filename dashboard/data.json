@@ -1,13 +1,21 @@
 {
-  "fetchedAt": "2026-09-12T15:35:42.096Z",
+  "fetchedAt": "2026-09-13T15:36:50.382Z",
   "channel": {
     "name": "BLOCK MIND.",
     "handle": "blockmindyt1",
     "subscribers": 0,
     "totalViews": 17,
-    "totalVideos": 5
+    "totalVideos": 6
   },
   "videos": [
+    {
+      "id": "WvSjyL83ZRM",
+      "title": "I Deleted Every App For 30 Days. Here's What Happened.@blockmindyt1 ",
+      "publishedAt": "2026-09-12T17:30:03Z",
+      "views": 1,
+      "likes": 0,
+      "comments": 0
+    },
     {
       "id": "d-HjoWZB-rs",
       "title": "Your Life Gets Better When You Stop Scrolling@QuietReminders-y2l self-improvementstress reliefdopami",
