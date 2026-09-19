@@ -1,13 +1,21 @@
 {
-  "fetchedAt": "2026-09-18T15:37:54.972Z",
+  "fetchedAt": "2026-09-19T15:35:41.726Z",
   "channel": {
     "name": "BLOCK MIND.",
     "handle": "blockmindyt1",
     "subscribers": 0,
-    "totalViews": 20,
-    "totalVideos": 7
+    "totalViews": 21,
+    "totalVideos": 8
   },
   "videos": [
+    {
+      "id": "IQ2-hyaJNC0",
+      "title": "Why Deleting Your Apps Never Actually Works@blockmindyt1 ",
+      "publishedAt": "2026-09-18T17:30:23Z",
+      "views": 0,
+      "likes": 0,
+      "comments": 0
+    },
     {
       "id": "AS_rMsdKgTs",
       "title": "Why You Feel Tense For No Reason — It's Your Phone #mentalhealth #copeup #reachout #talkinghelps",
